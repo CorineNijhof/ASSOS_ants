@@ -71,7 +71,7 @@ TO SETUP ;----------------------------------------------------------------------
     set counter counter + 1
   ]
   create-ants nr-ants
-  set-default-shape ants "ant"
+  ;set-default-shape ants "ant"       ; uncomment this line for ant-shaped ants
   ask ants [
     set color black
     set size 1.5
