@@ -4,9 +4,20 @@ breed [larvae larva]
 globals [
   hours                    ; number of elapsed hours
   minutes                  ; number of elapsed minutes (since start of hour)
+  mean_weight_small
+  mean_weight_medium
+  mean_weight_large
+  mean_weight_prepupae
+  mean_weight_pupae
+  size_small
+  size_medium
+  size_large
+  size_prepupae
+  size_pupae
 ]
 
 patches-own [
+  pheromones
   ;state                    ; contents of a cell: small/medium/large/prepupae/pupae
   ;brood_here               ; type of brood in cell: 0=nothing, 1/2/3/4/5
   ;neighboring_brood        ; number of nearby cells that contain brood
@@ -14,12 +25,21 @@ patches-own [
 ]
 
 ants-own [
-  ; ...............
+  target_larva  ; instance of larvae that ant is picking up
+  turn_stdev
+  steps_carrying      ; how long the ant is carrying a larva (0 if not carrying anything)
+  type_carrying       ; the type of the larva the ant is carrying (0 if not carrying anything)
+  tired               ; how tired the ant is, higher = more tired
 ]
 
 larvae-own [
+  def_color
   brood_type    ; type: 1=small/2=medium/3=large/4=prepupae/5=pupae
+  weight
+  carried       ; whether larva is currently being carried 1=yes/0=no
+  carrier
   care_domain   ; space the larva needs to be taken care of, circular range
+  enough_room   ; whether the larva has an empty care_domain 1=yes/0=no
   ; ...............
 ]
 
@@ -31,52 +51,94 @@ TO SETUP ;----------------------------------------------------------------------
     set pcolor white           ; set all patches white and empty
   ]
 
+  set mean_weight_small 0.40522
+  set mean_weight_medium 2.62807
+  set mean_weight_large 7.41487
+  set mean_weight_prepupae 5.92974
+  set mean_weight_pupae 5.83200
+
+  set size_small 0.5
+  set size_medium 0.75
+  set size_large 1.5
+  set size_prepupae 1.25
+  set size_pupae 1
+
+  create-ants nr-ants
+  set-default-shape ants "bug"
+  ;set-default-shape ants "default"
+  ask ants [
+    set steps_carrying 0
+    set type_carrying 0
+    set turn_stdev 2
+    set color black
+    set size 1
+    setxy random-xcor random-ycor
+  ]
+
   create-larvae nr-small + nr-medium + nr-large + nr-prepupae + nr-pupae
-  set-default-shape larvae "circle"
+  set-default-shape larvae "egg"
   let counter 0
   ask larvae [
+    set carried 0
+    set carrier nobody
     ifelse (counter < nr-small) [
       set brood_type 1
-      set color blue
-      set size 0.5
-      setxy random-xcor 1
+      set care_domain cd_small
+      set weight random-normal mean_weight_small 0.001
+      if weight < 0 [ set weight 0.1]
+      set def_color blue
+      set color def_color
+      set size size_small
+      setxy random-xcor 2
+      ;setxy random-xcor random-ycor
       ]
       [ifelse (counter < nr-small + nr-medium) [
         set brood_type 2
-        set color sky
-        set size 0.75
-        setxy random-xcor 2
+        set care_domain cd_medium
+        set weight random-normal mean_weight_medium 0.001
+        set def_color sky
+        set color def_color
+        set size size_medium
+        setxy random-xcor 8
+        ;setxy random-xcor random-ycor
         ]
         [ifelse (counter < nr-small + nr-medium + nr-large) [
           set brood_type 3
-          set color cyan
-          set size 1
-          setxy random-xcor 3
+          set care_domain cd_large
+          set weight random-normal mean_weight_large 0.001
+          set def_color cyan
+          set color def_color
+          set size size_large
+          setxy random-xcor 10
+          ;setxy random-xcor random-ycor
           ]
           [ifelse (counter < nr-small + nr-medium + nr-large + nr-prepupae) [
             set brood_type 4
-            set color orange
-            set size 1.25
+            set care_domain cd_prepupae
+            set weight random-normal mean_weight_prepupae 0.001
+            set def_color orange
+            set color def_color
+            set size size_prepupae
             setxy random-xcor 4
+            ;setxy random-xcor random-ycor
             ]
             [
               set brood_type 5
-              set color red
-              set size 1.5
-              setxy random-xcor 5
+              set care_domain cd_pupae
+              set weight random-normal mean_weight_pupae 0.001
+              set def_color red
+              set color def_color
+              set size size_pupae
+              setxy random-xcor 6
+              ;setxy random-xcor random-ycor
             ]
           ]
         ]
       ]
     set counter counter + 1
+    set enough_room 0
   ]
-  create-ants nr-ants
-  ;set-default-shape ants "ant"       ; uncomment this line for ant-shaped ants
-  ask ants [
-    set color black
-    set size 1.5
-    setxy random-xcor random-ycor
-  ]
+
 
   clear-output
   ; display color key in command window
@@ -95,22 +157,114 @@ TO GO ;-------------------------------------------------------------------------
 
 
   set minutes minutes + 1
-  if minutes > 60    ; every 60 minutes: increment hours and reset minutes
-  [
+  if minutes > 60 [       ; every 60 minutes: increment hours and reset minutes
     set hours hours + 1
     set minutes 0
   ]
-  ask ants
-  [
-    ;........................
+
+  ask larvae [
+    ;show count(larvae in-radius care_domain)
+    ifelse (count((larvae with [carried = 0]) in-radius care_domain) > 1) [
+      set enough_room 0
+      set color def_color
+    ]
+    [
+      set enough_room 1
+      ;if carried = 0 [ set color green ]
+    ]
+
+    if carried = 1 [
+      let car_corx 0
+      let car_cory 0
+      ask carrier [
+        set car_corx xcor
+        set car_cory ycor
+      ]
+      setxy car_corx car_cory
+    ]
+  ]
+
+  ask patches [
+    ; stuff with pheromones...
+  ]
+
+  ask ants [
+    check_boundaries
+
+    ifelse steps_carrying = 0 [
+      select-target
+      if target_larva != nobody [
+        pick-up
+      ]
+    ]
+    [
+      set steps_carrying steps_carrying + 1
+    ]
+    right random-normal 0 turn_stdev
+    forward 0.05
+
+    if target_larva != nobody [
+      drop
+    ]
+
   ]
 end
+
+; select the larva target
+to select-target
+  set target_larva min-one-of (larvae with [(carried = 0) and (enough_room = 0)]) in-cone vision FOV [distance myself]
+  if target_larva != nobody [
+    set heading towards target_larva
+  ]
+end
+
+; make sure ants don't get stuck at walls
+to check_boundaries
+  if (xcor > 23) or (xcor < 0) or (ycor > 35) or (ycor < 0) [
+    set heading towardsxy (max-pxcor / 2) (max-pycor / 2)
+  ]
+end
+
+to pick-up
+  if distance target_larva < pickup_range [
+    set type_carrying ([brood_type] of target_larva)
+    set steps_carrying 1
+
+    let carrying_ant self
+    ask target_larva [
+      set carrier carrying_ant
+      set carried 1
+      set color def_color
+    ]
+  ]
+end
+
+to drop
+  set tired steps_carrying * sqrt([weight] of target_larva)
+
+  if (([enough_room] of target_larva) = 1) or (tired > max_tiredness) [
+    set steps_carrying 0
+    set tired 0
+    ask target_larva [
+      set carrier nobody
+      set carried 0
+      ;if enough_room = 1 [ set color green ]
+    ]
+  ]
+end
+
+
+
+
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
-321
-10
-713
-595
+332
+16
+724
+601
 -1
 -1
 16.0
@@ -120,8 +274,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 0
 23
@@ -131,7 +285,7 @@ GRAPHICS-WINDOW
 0
 1
 ticks
-20.0
+5.0
 
 BUTTON
 10
@@ -168,10 +322,10 @@ NIL
 1
 
 MONITOR
-181
-245
-238
-290
+182
+76
+239
+121
 NIL
 hours
 0
@@ -179,10 +333,10 @@ hours
 11
 
 MONITOR
-238
-245
-293
-290
+244
+76
+294
+121
 NIL
 minutes
 0
@@ -192,10 +346,10 @@ minutes
 BUTTON
 190
 13
-276
+283
 67
-100 steps
-repeat 100 [go]
+48 hours
+repeat 48 * 60 [go]
 NIL
 1
 T
@@ -209,7 +363,7 @@ NIL
 SLIDER
 12
 305
-184
+146
 338
 nr-small
 nr-small
@@ -224,7 +378,7 @@ HORIZONTAL
 SLIDER
 12
 340
-184
+146
 373
 nr-medium
 nr-medium
@@ -239,7 +393,7 @@ HORIZONTAL
 SLIDER
 12
 376
-184
+146
 409
 nr-large
 nr-large
@@ -254,7 +408,7 @@ HORIZONTAL
 SLIDER
 12
 411
-184
+147
 444
 nr-prepupae
 nr-prepupae
@@ -269,7 +423,7 @@ HORIZONTAL
 SLIDER
 12
 446
-184
+147
 479
 nr-pupae
 nr-pupae
@@ -282,19 +436,179 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-246
-166
-279
+16
+75
+169
+108
 nr-ants
 nr-ants
 0
 100
-50.0
+78.0
 1
 1
 workers
 HORIZONTAL
+
+SLIDER
+18
+172
+190
+205
+FOV
+FOV
+0
+360
+80.0
+10
+1
+degrees
+HORIZONTAL
+
+SLIDER
+17
+134
+189
+167
+vision
+vision
+0
+35
+5.0
+1
+1
+patches
+HORIZONTAL
+
+SLIDER
+18
+210
+190
+243
+speed
+speed
+0
+1
+0.5
+0.01
+1
+patches/tick
+HORIZONTAL
+
+SLIDER
+19
+247
+191
+280
+pickup_range
+pickup_range
+0
+5
+0.3
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+152
+305
+324
+338
+cd_small
+cd_small
+0
+5
+1.0
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+152
+341
+324
+374
+cd_medium
+cd_medium
+0
+5
+2.0
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+152
+377
+324
+410
+cd_large
+cd_large
+0
+5
+4.0
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+152
+412
+324
+445
+cd_prepupae
+cd_prepupae
+0
+5
+1.5
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+152
+446
+324
+479
+cd_pupae
+cd_pupae
+0
+5
+1.5
+0.1
+1
+patches
+HORIZONTAL
+
+SLIDER
+12
+500
+220
+533
+max_tiredness
+max_tiredness
+0
+300
+300.0
+10
+1
+steps*weight
+HORIZONTAL
+
+TEXTBOX
+740
+121
+901
+211
+dark blue    - small larvae\nmiddle blue - medium larvae\nlight blue    - large larvae\norange       - prepupae     \nred            - pupae        
+12
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -480,6 +794,15 @@ true
 0
 Polygon -7500403 true true 45 255 255 255 255 45 45 45
 
+bug
+true
+0
+Circle -7500403 true true 96 182 108
+Circle -7500403 true true 110 127 80
+Circle -7500403 true true 110 75 80
+Line -7500403 true 150 100 80 30
+Line -7500403 true 150 100 220 30
+
 butterfly1
 true
 0
@@ -499,6 +822,13 @@ circle
 false
 0
 Circle -7500403 true true 35 35 230
+
+egg
+false
+0
+Circle -7500403 true true 96 76 108
+Circle -7500403 true true 72 104 156
+Polygon -7500403 true true 221 149 195 101 106 99 80 148
 
 link
 true
