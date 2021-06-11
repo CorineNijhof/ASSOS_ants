@@ -49,6 +49,7 @@ TO SETUP ;----------------------------------------------------------------------
   set minutes 0
   ask patches [
     set pcolor white           ; set all patches white and empty
+    set pheromones 0
   ]
 
   set mean_weight_small 0.40522
@@ -58,7 +59,7 @@ TO SETUP ;----------------------------------------------------------------------
   set mean_weight_pupae 5.83200
 
   set size_small 0.5
-  set size_medium 0.75
+  set size_medium 1.30
   set size_large 1.5
   set size_prepupae 1.25
   set size_pupae 1
@@ -185,7 +186,12 @@ TO GO ;-------------------------------------------------------------------------
   ]
 
   ask patches [
-    ; stuff with pheromones...
+    set pheromones count larvae-here
+  ]
+  diffuse pheromones 0.5
+  ask patches [
+    set pcolor scale-color yellow pheromones 1 0
+
   ]
 
   ask ants [
@@ -193,8 +199,11 @@ TO GO ;-------------------------------------------------------------------------
 
     ifelse steps_carrying = 0 [
       select-target
-      if target_larva != nobody [
+      ifelse target_larva != nobody [
         pick-up
+      ]
+      [
+       turn-toward-pheromones
       ]
     ]
     [
@@ -216,6 +225,22 @@ to select-target
   if target_larva != nobody [
     set heading towards target_larva
   ]
+end
+
+
+to turn-toward-pheromones  ;; we want the ants to move towards the pheromone if its not carrying anything procedure
+  ;; examine the patch ahead of you and two nearby patches;
+  ;; turn in the direction of greatest chemical
+  if patch-ahead 10 != nobody and patch-right-and-ahead FOV 10 != nobody and patch-left-and-ahead FOV 10 != nobody [
+    let ahead [pheromones] of patch-ahead 10
+    let myright [pheromones] of patch-right-and-ahead FOV 10
+    let myleft [pheromones] of patch-left-and-ahead FOV 10
+    ifelse (myright >= ahead) and (myright >= myleft)
+    [ rt FOV]
+    [ if myleft >= ahead
+      [ lt FOV ] ]
+  ]
+    ;; default: don't turn
 end
 
 ; make sure ants don't get stuck at walls
@@ -252,8 +277,6 @@ to drop
     ]
   ]
 end
-
-
 
 
 
@@ -459,7 +482,7 @@ FOV
 FOV
 0
 360
-80.0
+130.0
 10
 1
 degrees
@@ -489,7 +512,7 @@ speed
 speed
 0
 1
-0.5
+0.85
 0.01
 1
 patches/tick
@@ -519,7 +542,7 @@ cd_small
 cd_small
 0
 5
-1.0
+0.4
 0.1
 1
 patches
@@ -534,7 +557,7 @@ cd_medium
 cd_medium
 0
 5
-2.0
+1.0
 0.1
 1
 patches
@@ -549,7 +572,7 @@ cd_large
 cd_large
 0
 5
-4.0
+2.3
 0.1
 1
 patches
@@ -564,7 +587,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-1.5
+1.0
 0.1
 1
 patches
@@ -579,7 +602,7 @@ cd_pupae
 cd_pupae
 0
 5
-1.5
+1.0
 0.1
 1
 patches
@@ -594,7 +617,7 @@ max_tiredness
 max_tiredness
 0
 300
-300.0
+120.0
 10
 1
 steps*weight
@@ -959,7 +982,7 @@ Polygon -6459832 true true 38 138 66 149
 Polygon -6459832 true true 46 128 33 120 21 118 11 123 3 138 5 160 13 178 9 192 0 199 20 196 25 179 24 161 25 148 45 140
 Polygon -6459832 true true 67 122 96 126 63 144
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
