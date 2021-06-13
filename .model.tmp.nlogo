@@ -1044,7 +1044,7 @@ NetLogo 6.1.1
   <experiment name="experiment" repetitions="3" sequentialRunOrder="false" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="500"/>
+    <timeLimit steps="10000"/>
     <metric>mean [ycor] of larvae with [brood_type = 1]</metric>
     <metric>mean [ycor] of larvae with [brood_type = 2]</metric>
     <metric>mean [ycor] of larvae with [brood_type = 3]</metric>
