@@ -4,6 +4,7 @@ breed [larvae larva]
 globals [
   hours                    ; number of elapsed hours
   minutes                  ; number of elapsed minutes (since start of hour)
+  nr_larvae
   mean_weight_small
   mean_weight_medium
   mean_weight_large
@@ -45,26 +46,33 @@ larvae-own [
 
 TO SETUP ;-----------------------------------------------------------------------------------------
   clear-all                    ; clears display, turtles, and patches
+
+  ; setup time
   set hours 0
   set minutes 0
+
+  ; setup patches
   ask patches [
     set pcolor white           ; set all patches white and empty
     set pheromones 0
   ]
 
+  ; set weights
   set mean_weight_small 0.40522
   set mean_weight_medium 2.62807
   set mean_weight_large 7.41487
   set mean_weight_prepupae 5.92974
   set mean_weight_pupae 5.83200
 
+  ; set sizes
   set size_small 0.5
   set size_medium 1.30
   set size_large 1.5
   set size_prepupae 1.25
   set size_pupae 1
 
-  create-ants nr-ants
+  ; ant population
+  create-ants nr_ants
   set-default-shape ants "bug"
   ;set-default-shape ants "default"
   ask ants [
@@ -76,66 +84,104 @@ TO SETUP ;----------------------------------------------------------------------
     setxy random-xcor random-ycor
   ]
 
-  create-larvae nr-small + nr-medium + nr-large + nr-prepupae + nr-pupae
+  ; larvae population
+  set nr_larvae (nr_small + nr_medium + nr_large + nr_prepupae + nr_pupae)
+  create-larvae nr_larvae
   set-default-shape larvae "egg"
   let counter 0
   ask larvae [
+    ; set carrier parameters
     set carried 0
     set carrier nobody
-    ifelse (counter < nr-small) [
+
+    ; set brood types
+    ifelse (counter < nr_small) [ ;; small larvae
       set brood_type 1
+    ]
+    [
+      ifelse (counter < nr_small + nr_medium) [ ;; medium larvae
+        set brood_type 2
+      ]
+      [
+        ifelse (counter < nr_small + nr_medium + nr_large) [ ;; large larvae
+          set brood_type 3
+        ]
+        [
+          ifelse (counter < nr_small + nr_medium + nr_large + nr_prepupae) [ ;; prepupae
+            set brood_type 4
+          ]
+          [                      ;; pupae
+            set brood_type 5
+          ]
+        ]
+      ]
+    ]
+
+    ; set initial coordinates
+    if initial_placing = "random" [
+      setxy random-xcor random-ycor
+    ]
+    if initial_placing = "center" [
+      setxy (random-float 6 + 8.5) (random-float 6 + 14.5)
+    ]
+    if initial_placing = "bottom" [
+      setxy (random-float 13 + 5) (random-float 6 + 5)
+    ]
+
+    ; setup larvae per type
+    ask larvae with [brood_type = 1] [       ;; small larvae
       set care_domain cd_small
       set weight random-normal mean_weight_small 0.001
       if weight < 0 [ set weight 0.1]
       set def_color blue
       set color def_color
       set size size_small
-      setxy random-xcor 2
-      ;setxy random-xcor random-ycor
+      if initial_placing = "sorted bottom" [
+        setxy random-xcor 2
       ]
-      [ifelse (counter < nr-small + nr-medium) [
-        set brood_type 2
-        set care_domain cd_medium
-        set weight random-normal mean_weight_medium 0.001
-        set def_color sky
-        set color def_color
-        set size size_medium
+    ]
+    ask larvae with [brood_type = 2] [       ;; medium larvae
+      set care_domain cd_medium
+      set weight random-normal mean_weight_medium 0.001
+      set def_color sky
+      set color def_color
+      set size size_medium
+      if initial_placing = "sorted bottom" [
         setxy random-xcor 8
-        ;setxy random-xcor random-ycor
-        ]
-        [ifelse (counter < nr-small + nr-medium + nr-large) [
-          set brood_type 3
-          set care_domain cd_large
-          set weight random-normal mean_weight_large 0.001
-          set def_color cyan
-          set color def_color
-          set size size_large
-          setxy random-xcor 10
-          ;setxy random-xcor random-ycor
-          ]
-          [ifelse (counter < nr-small + nr-medium + nr-large + nr-prepupae) [
-            set brood_type 4
-            set care_domain cd_prepupae
-            set weight random-normal mean_weight_prepupae 0.001
-            set def_color orange
-            set color def_color
-            set size size_prepupae
-            setxy random-xcor 4
-            ;setxy random-xcor random-ycor
-            ]
-            [
-              set brood_type 5
-              set care_domain cd_pupae
-              set weight random-normal mean_weight_pupae 0.001
-              set def_color red
-              set color def_color
-              set size size_pupae
-              setxy random-xcor 6
-              ;setxy random-xcor random-ycor
-            ]
-          ]
-        ]
       ]
+    ]
+    ask larvae with [brood_type = 3] [       ;; large larvae
+      set care_domain cd_large
+      set weight random-normal mean_weight_large 0.001
+      set def_color cyan
+      set color def_color
+      set size size_large
+      if initial_placing = "sorted bottom" [
+        setxy random-xcor 10
+      ]
+    ]
+    ask larvae with [brood_type = 4] [       ;; prepupae
+      set care_domain cd_prepupae
+      set weight random-normal mean_weight_prepupae 0.001
+      set def_color orange
+      set color def_color
+      set size size_prepupae
+      if initial_placing = "sorted bottom" [
+        setxy random-xcor 4
+      ]
+    ]
+    ask larvae with [brood_type = 5] [       ;; pupae
+      set care_domain cd_pupae
+      set weight random-normal mean_weight_pupae 0.001
+      set def_color red
+      set color def_color
+      set size size_pupae
+      if initial_placing = "sorted bottom" [
+        setxy random-xcor 6
+      ]
+    ]
+
+
     set counter counter + 1
     set enough_room 0
   ]
@@ -186,12 +232,11 @@ TO GO ;-------------------------------------------------------------------------
   ]
 
   ask patches [
-    set pheromones count larvae-here
+    set pheromones (count larvae-here) / 10
   ]
-  diffuse pheromones 0.5
+  diffuse pheromones pheromone_diffusion
   ask patches [
     set pcolor scale-color yellow pheromones 1 0
-
   ]
 
   ask ants [
@@ -199,17 +244,17 @@ TO GO ;-------------------------------------------------------------------------
 
     ifelse steps_carrying = 0 [
       select-target
-      ifelse target_larva != nobody [
-        pick-up
+      ifelse target_larva = nobody [
+        turn-toward-pheromones
       ]
       [
-       turn-toward-pheromones
+        pick-up
       ]
     ]
     [
       set steps_carrying steps_carrying + 1
     ]
-    right random-normal 0 turn_stdev
+    ;right random-normal 0 turn_stdev
     forward 0.05
 
     if target_larva != nobody [
@@ -228,20 +273,12 @@ to select-target
   ]
 end
 
-
-to turn-toward-pheromones  ;; we want the ants to move towards the pheromone if its not carrying anything procedure
-  ;; examine the patch ahead of you and two nearby patches;
-  ;; turn in the direction of greatest chemical
-  if patch-ahead 10 != nobody and patch-right-and-ahead FOV 10 != nobody and patch-left-and-ahead FOV 10 != nobody [
-    let ahead [pheromones] of patch-ahead 10
-    let myright [pheromones] of patch-right-and-ahead FOV 10
-    let myleft [pheromones] of patch-left-and-ahead FOV 10
-    ifelse (myright >= ahead) and (myright >= myleft)
-    [ rt FOV]
-    [ if myleft >= ahead
-      [ lt FOV ] ]
+; turn towards the patch with the most highest amount of pheromones in the smell range of the ant
+to turn-toward-pheromones
+  let target_patch max-one-of (patches in-radius scent_range) [pheromones]
+  if [pheromones] of target_patch != 0 [
+    set heading towards target_patch
   ]
-    ;; default: don't turn
 end
 
 ; make sure ants don't get stuck at walls
@@ -282,13 +319,12 @@ end
 
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-332
-16
-724
-601
+470
+10
+862
+595
 -1
 -1
 16.0
@@ -385,12 +421,12 @@ NIL
 1
 
 SLIDER
-12
-305
-146
-338
-nr-small
-nr-small
+17
+385
+151
+418
+nr_small
+nr_small
 0
 50
 20.0
@@ -400,12 +436,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-340
-146
-373
-nr-medium
-nr-medium
+17
+420
+151
+453
+nr_medium
+nr_medium
 0
 50
 20.0
@@ -415,12 +451,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-376
-146
-409
-nr-large
-nr-large
+17
+456
+151
+489
+nr_large
+nr_large
 0
 50
 20.0
@@ -430,12 +466,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-411
-147
-444
-nr-prepupae
-nr-prepupae
+17
+491
+152
+524
+nr_prepupae
+nr_prepupae
 0
 50
 20.0
@@ -445,12 +481,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-446
-147
-479
-nr-pupae
-nr-pupae
+17
+526
+152
+559
+nr_pupae
+nr_pupae
 0
 50
 20.0
@@ -464,66 +500,66 @@ SLIDER
 75
 169
 108
-nr-ants
-nr-ants
+nr_ants
+nr_ants
 0
 100
-78.0
+80.0
 1
 1
 workers
 HORIZONTAL
 
 SLIDER
-18
+16
 172
-190
+188
 205
 FOV
 FOV
 0
 360
-130.0
+120.0
 10
 1
 degrees
 HORIZONTAL
 
 SLIDER
-17
-134
+16
+136
 189
-167
+169
 vision
 vision
 0
 35
-5.0
+6.0
 1
 1
 patches
 HORIZONTAL
 
 SLIDER
-18
-210
-190
-243
+16
+246
+188
+279
 speed
 speed
 0
 1
-0.85
+0.5
 0.01
 1
 patches/tick
 HORIZONTAL
 
 SLIDER
-19
-247
-191
-280
+17
+283
+189
+316
 pickup_range
 pickup_range
 0
@@ -535,10 +571,10 @@ patches
 HORIZONTAL
 
 SLIDER
-152
-305
-324
-338
+157
+385
+329
+418
 cd_small
 cd_small
 0
@@ -550,181 +586,144 @@ patches
 HORIZONTAL
 
 SLIDER
-152
-341
-324
-374
+157
+421
+329
+454
 cd_medium
 cd_medium
 0
 5
-0.5
+1.5
 0.1
 1
 patches
 HORIZONTAL
 
 SLIDER
-152
-377
-324
-410
+157
+457
+329
+490
 cd_large
 cd_large
 0
 5
-0.5
+4.0
 0.1
 1
 patches
 HORIZONTAL
 
 SLIDER
-152
-412
-324
-445
+157
+492
+329
+525
 cd_prepupae
 cd_prepupae
 0
 5
-0.5
+2.5
 0.1
 1
 patches
 HORIZONTAL
 
 SLIDER
-152
-446
-324
-479
+157
+526
+329
+559
 cd_pupae
 cd_pupae
 0
 5
-0.5
+2.4
 0.1
 1
 patches
 HORIZONTAL
 
 SLIDER
-12
-500
-220
-533
+17
+321
+225
+354
 max_tiredness
 max_tiredness
 0
 300
-120.0
+130.0
 10
 1
 steps*weight
 HORIZONTAL
 
 TEXTBOX
-740
-121
-901
-211
-dark blue    - small larvae\nmiddle blue - medium larvae\nlight blue    - large larvae\norange       - prepupae     \nred            - pupae        
+307
+10
+468
+130
+Grid size: 23x35\n\nLarvae color code\ndark blue    - small larvae\nmiddle blue - medium larvae\nlight blue    - large larvae\norange       - prepupae     \nred            - pupae        
 12
 0.0
 1
 
+SLIDER
+252
+181
+460
+214
+pheromone_diffusion
+pheromone_diffusion
+0
+1
+0.4
+0.1
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+252
+218
+460
+263
+initial_placing
+initial_placing
+"sorted bottom" "random" "center" "bottom"
+2
+
+SLIDER
+16
+208
+188
+241
+scent_range
+scent_range
+0
+35
+15.0
+1
+1
+patches
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-This program models the formation of three distinct
-concentric regions on the comb of a honey bee colony: a
-central brood area, a surrounding rim of pollen, and a
-large peripheral region of honey.  This pattern emerges from
-the following rules regarding the input and outflow of
-brood, honey, and pollen:
 
-   - The BROOD is deposited relatively rapidly by the queen
-
-     in the center of the comb.  Patches which have a
-     threshold number of bordering brood (four by default)
-     are selected at random to hold the eggs.  The brood
-     matures relatively slowly, leaving the cell after a
-     period of 21 days (in nature.)
-
-
-   - The HONEY is deposited in random cells by drone
-
-     bees of the hive, with an input rate that exceeds brood
-     production and a consumption rate that is relatively
-     low.
-
-   - The POLLEN is depostied in random cells by drone bees
-
-     of the hive, with a slow input rate and a fast consumption
-     rate.  The model allows for a "flux" of pollen after a
-     given number of days to correspond with a discovery of a new
-     pollen source; the input rate of pollen during this time is
-     much higher than normal.
-
-While the queen deposits eggs constantly, the honey and
-pollen inflow ceases at night (hours 12 to 24 in the model.)
-
-
-In addition, the consumption rates of honey and pollen go up
-linearly with the number of nearby brood cells.  This food
-consumption by the brood is a parameter of the model.
-
-As a simplification, the inputs and outputs of brood, honey,
-and pollen are expressed as rates, such that each patch's
-contents on a given time step is determined
-probabilistically (rather than by the motions of autonomous
-drones and queen.)
 
 ## HOW TO USE IT
 
-The SETUP button resets the time, displays a color key, and
-places a few brood cells in the center of the screen.
+The SETUP button resets the time, displays a color key, ...
 
 The GO button runs the simulation according to the rules
 described above.
 
-The IN_BROOD, IN_HONEY, and IN_POLLEN sliders control the
-probability (in 0.1 %, or parts per thousand) that an empty
-cell will acquire the respective contents during a given
-hour.
-
-The OUT_BROOD, OUT_HONEY, and OUT_POLLEN sliders control the
-probability (in 0.1 %, or parts per thousand) that a cell
-filled with the respective contents will become empty during
-a given hour.
-
-The FLUX_START slider specifies the day on which a pollen
-flux will begin.
-
-The FLUX_POLLEN slider sets the rate of incoming pollen
-during the flux period.
-
-The CONSUMPTION slider augments the OUT_HONEY and OUT_POLLEN
-values for patches that are close to brood cells.  For each
-brood cell within a 5 x 5 box centered at a honey or pollen
-patch, the probability of that patch being emptied is
-increased by "consumption."
-
-The DAYS and HOURS monitors show the elapsed time; a time
-step lasts one hour.
 
 ## THINGS TO NOTICE
-
-The pattern is a logical result of the parameters.  The
-brood is created in the center, and resides there for a long
-period of time.  The honey dominates the periphery because
-it is deposited faster than pollen and removed more slowly.
-The pollen ring around the brood forms during the pollen
-"flux" because the brood's consumption (especially
-overnight) makes room for them there.  Changing the relative
-magnitude of the slider variables will influence the
-progression of this pattern.
 
 ## CREDITS AND REFERENCES
 @#$#@#$#@
@@ -983,7 +982,7 @@ Polygon -6459832 true true 38 138 66 149
 Polygon -6459832 true true 46 128 33 120 21 118 11 123 3 138 5 160 13 178 9 192 0 199 20 196 25 179 24 161 25 148 45 140
 Polygon -6459832 true true 67 122 96 126 63 144
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
