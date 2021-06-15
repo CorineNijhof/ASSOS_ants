@@ -2,7 +2,6 @@ breed [ants ant]      ; two types of turtles: ants and larvae
 breed [larvae larva]
 
 globals [
-  hours                    ; number of elapsed hours
   minutes                  ; number of elapsed minutes (since start of hour)
   nr_larvae
   mean_weight_small
@@ -125,7 +124,7 @@ TO SETUP ;----------------------------------------------------------------------
       setxy (random-float 6 + 8.5) (random-float 6 + 14.5)
     ]
     if initial_placing = "bottom" [
-      setxy (random-float 13 + 5) (random-float 6 + 5)
+      setxy (random-float 13 + ) (random-float 6 + 5)
     ]
 
     ; setup larvae per type
@@ -204,7 +203,7 @@ TO GO ;-------------------------------------------------------------------------
 
 
   set minutes minutes + 1
-  if minutes > 60 [       ; every 60 minutes: increment hours and reset minutes
+  if minutes = 60 [       ; every 60 minutes: increment hours and reset minutes
     set hours hours + 1
     set minutes 0
   ]
@@ -212,7 +211,7 @@ TO GO ;-------------------------------------------------------------------------
   ask larvae [
 
     ;show count(larvae in-radius care_domain)
-    ifelse (count((larvae with [carried = 0]) in-radius care_domain) > 1) [
+    ifelse (count((larvae with [carried = 0]) in-radius care_domain) + count larvae-here > 1) [
       set enough_room 0
       set color def_color
     ]
@@ -277,7 +276,7 @@ end
 ; turn towards the patch with the most highest amount of pheromones in the smell range of the ant
 to turn-toward-pheromones
   let target_patch max-one-of (patches in-radius scent_range) [pheromones]
-  if [pheromones] of target_patch != 0 and (xcor != [pxcor] of target_patch and ycor != [pycor] of target_patch) [
+  if [pheromones] of target_patch != 0 and (xcor != [pxcor] of target_patch or ycor != [pycor] of target_patch) [
     set heading towards target_patch
   ]
 end
@@ -579,7 +578,7 @@ cd_small
 cd_small
 0
 5
-1.0
+0.1
 0.1
 1
 patches
@@ -594,7 +593,7 @@ cd_medium
 cd_medium
 0
 5
-2.0
+2.5
 0.1
 1
 patches
@@ -609,7 +608,7 @@ cd_large
 cd_large
 0
 5
-3.5
+5.0
 0.1
 1
 patches
@@ -679,7 +678,7 @@ pheromone_diffusion
 pheromone_diffusion
 0
 1
-0.4
+0.6
 0.1
 1
 NIL
@@ -693,7 +692,7 @@ CHOOSER
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
-1
+3
 
 SLIDER
 16
@@ -704,7 +703,7 @@ scent_range
 scent_range
 0
 35
-15.0
+16.0
 1
 1
 patches
