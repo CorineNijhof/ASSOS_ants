@@ -66,15 +66,14 @@ TO SETUP ;----------------------------------------------------------------------
 
   ; set sizes
   set size_small 0.5
-  set size_medium 1.30
+  set size_medium 1.25
   set size_large 1.5
-  set size_prepupae 1.25
-  set size_pupae 1
+  set size_prepupae 1
+  set size_pupae 0.75
 
   ; ant population
   create-ants nr_ants
   set-default-shape ants "bug"
-  ;set-default-shape ants "default"
   ask ants [
     set steps_carrying 0
     set type_carrying 0
@@ -125,7 +124,7 @@ TO SETUP ;----------------------------------------------------------------------
       setxy (random-float 6 + 8.5) (random-float 6 + 14.5)
     ]
     if initial_placing = "bottom" [
-      setxy (random-float 13 + 5) (random-float 6 + 5)
+      setxy (random-float 13 + 5) (random-float 6)
     ]
 
     ; setup larvae per type
@@ -137,7 +136,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_small
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 2
+        setxy random-xcor (random-float 2 + 2)
       ]
     ]
     ask larvae with [brood_type = 2] [       ;; medium larvae
@@ -147,7 +146,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_medium
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 8
+        setxy random-xcor (random-float 2 + 8)
       ]
     ]
     ask larvae with [brood_type = 3] [       ;; large larvae
@@ -157,7 +156,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_large
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 10
+        setxy random-xcor (random-float 2 + 10)
       ]
     ]
     ask larvae with [brood_type = 4] [       ;; prepupae
@@ -167,7 +166,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_prepupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 4
+        setxy random-xcor (random-float 2 + 4)
       ]
     ]
     ask larvae with [brood_type = 5] [       ;; pupae
@@ -177,7 +176,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_pupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 6
+        setxy random-xcor (random-float 2 + 6)
       ]
     ]
 
@@ -204,14 +203,14 @@ TO GO ;-------------------------------------------------------------------------
 
 
   set minutes minutes + 1
-  if minutes > 60 [       ; every 60 minutes: increment hours and reset minutes
+  if minutes = 60 [       ; every 60 minutes: increment hours and reset minutes
     set hours hours + 1
     set minutes 0
   ]
 
   ask larvae [
     ;show count(larvae in-radius care_domain)
-    ifelse (count((larvae with [carried = 0]) in-radius care_domain) > 1) [
+    ifelse (count((larvae with [carried = 0]) in-radius care_domain) + count larvae-here > 1) [
       set enough_room 0
       set color def_color
     ]
@@ -232,7 +231,7 @@ TO GO ;-------------------------------------------------------------------------
   ]
 
   ask patches [
-    set pheromones (count larvae-here) / 10
+    set pheromones (count larvae-here) / 8
   ]
   diffuse pheromones pheromone_diffusion
   ask patches [
@@ -268,7 +267,7 @@ end
 ; select the larva target
 to select-target
   set target_larva min-one-of (larvae with [(carried = 0) and (enough_room = 0)]) in-cone vision FOV [distance myself]
-  if target_larva != nobody [
+  if target_larva != nobody and (xcor != [xcor] of target_larva or ycor != [ycor] of target_larva) [
     set heading towards target_larva
   ]
 end
@@ -276,7 +275,7 @@ end
 ; turn towards the patch with the most highest amount of pheromones in the smell range of the ant
 to turn-toward-pheromones
   let target_patch max-one-of (patches in-radius scent_range) [pheromones]
-  if [pheromones] of target_patch != 0 [
+  if [pheromones] of target_patch != 0 and (xcor != [pxcor] of target_patch or ycor != [pycor] of target_patch) [
     set heading towards target_patch
   ]
 end
@@ -288,6 +287,7 @@ to check_boundaries
   ]
 end
 
+; if the target larva is within pickup range, pick it up and start carrying it
 to pick-up
   if distance target_larva < pickup_range [
     set type_carrying ([brood_type] of target_larva)
@@ -302,6 +302,7 @@ to pick-up
   ]
 end
 
+; if the ant is tired or there is enough room around the current location for the larva to be cared for, drop the larva
 to drop
   set tired steps_carrying * sqrt([weight] of target_larva)
 
@@ -313,9 +314,9 @@ to drop
       set carried 0
       ;if enough_room = 1 [ set color green ]
     ]
+    set target_larva nobody
   ]
 end
-
 
 
 
@@ -409,7 +410,7 @@ BUTTON
 283
 67
 48 hours
-repeat 48 * 60 [go]
+repeat (48 * 60) [go]
 NIL
 1
 T
@@ -594,7 +595,7 @@ cd_medium
 cd_medium
 0
 5
-1.5
+3.5
 0.1
 1
 patches
@@ -609,7 +610,7 @@ cd_large
 cd_large
 0
 5
-4.0
+5.0
 0.1
 1
 patches
@@ -624,7 +625,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-2.5
+1.5
 0.1
 1
 patches
@@ -639,7 +640,7 @@ cd_pupae
 cd_pupae
 0
 5
-2.4
+2.0
 0.1
 1
 patches
@@ -654,7 +655,7 @@ max_tiredness
 max_tiredness
 0
 300
-130.0
+100.0
 10
 1
 steps*weight
@@ -679,7 +680,7 @@ pheromone_diffusion
 pheromone_diffusion
 0
 1
-0.4
+0.5
 0.1
 1
 NIL
@@ -704,7 +705,7 @@ scent_range
 scent_range
 0
 35
-15.0
+12.0
 1
 1
 patches
