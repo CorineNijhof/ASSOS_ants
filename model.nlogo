@@ -136,7 +136,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_small
       if initial_placing = "sorted bottom" [
-        setxy random-xcor (random-float 2 + 2)
+        setxy random-xcor 2
       ]
     ]
     ask larvae with [brood_type = 2] [       ;; medium larvae
@@ -146,7 +146,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_medium
       if initial_placing = "sorted bottom" [
-        setxy random-xcor (random-float 2 + 8)
+        setxy random-xcor 8
       ]
     ]
     ask larvae with [brood_type = 3] [       ;; large larvae
@@ -156,7 +156,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_large
       if initial_placing = "sorted bottom" [
-        setxy random-xcor (random-float 2 + 10)
+        setxy random-xcor 10
       ]
     ]
     ask larvae with [brood_type = 4] [       ;; prepupae
@@ -166,7 +166,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_prepupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor (random-float 2 + 4)
+        setxy random-xcor 4
       ]
     ]
     ask larvae with [brood_type = 5] [       ;; pupae
@@ -176,7 +176,7 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_pupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor (random-float 2 + 6)
+        setxy random-xcor 6
       ]
     ]
 
@@ -201,7 +201,6 @@ end
 
 TO GO ;--------------------------------------------------------------------------------------------
 
-
   set minutes minutes + 1
   if minutes = 60 [       ; every 60 minutes: increment hours and reset minutes
     set hours hours + 1
@@ -209,8 +208,8 @@ TO GO ;-------------------------------------------------------------------------
   ]
 
   ask larvae [
-    ;show count(larvae in-radius care_domain)
-    ifelse (count((larvae with [carried = 0]) in-radius care_domain) + count larvae-here > 1) [
+
+    ifelse (count((larvae with [carried = 0]) in-radius care_domain) > 1) [
       set enough_room 0
       set color def_color
     ]
@@ -302,7 +301,8 @@ to pick-up
   ]
 end
 
-; if the ant is tired or there is enough room around the current location for the larva to be cared for, drop the larva
+; if the ant is tired or there is enough room around the current location 
+; for the larva to be cared for, drop the larva
 to drop
   set tired steps_carrying * sqrt([weight] of target_larva)
 
@@ -580,7 +580,7 @@ cd_small
 cd_small
 0
 5
-0.5
+1.0
 0.1
 1
 patches
@@ -625,7 +625,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-1.5
+1.4
 0.1
 1
 patches
@@ -694,7 +694,7 @@ CHOOSER
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
-2
+1
 
 SLIDER
 16
@@ -714,19 +714,44 @@ HORIZONTAL
 @#$#@#$#@
 ## WHAT IS IT?
 
+(a general understanding of what the model is trying to show or explain)
 
+## HOW IT WORKS
 
-## HOW TO USE IT
-
+(what rules the agents use to create the overall behavior of the model)
 The SETUP button resets the time, displays a color key, ...
 
 The GO button runs the simulation according to the rules
 described above.
 
 
+## HOW TO USE IT
+
+(how to use the model, including a description of each of the items in the Interface tab)
+
 ## THINGS TO NOTICE
 
+(suggested things for the user to notice while running the model)
+
+## THINGS TO TRY
+
+(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+
+## EXTENDING THE MODEL
+
+(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+
+## NETLOGO FEATURES
+
+(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+
+## RELATED MODELS
+
+(models in the NetLogo Models Library and elsewhere which are of related interest)
+
 ## CREDITS AND REFERENCES
+
+(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
 @#$#@#$#@
 default
 true
@@ -983,7 +1008,7 @@ Polygon -6459832 true true 38 138 66 149
 Polygon -6459832 true true 46 128 33 120 21 118 11 123 3 138 5 160 13 178 9 192 0 199 20 196 25 179 24 161 25 148 45 140
 Polygon -6459832 true true 67 122 96 126 63 144
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
