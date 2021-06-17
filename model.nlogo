@@ -121,7 +121,7 @@ TO SETUP ;----------------------------------------------------------------------
       setxy random-xcor random-ycor
     ]
     if initial_placing = "center" [
-      setxy (random-float 6 + 8.5) (random-float 6 + 14.5)
+      setxy ((random-float 5 - 2.5) + 11.5) ((random-float 5 - 2.5) + 17.5)
     ]
     if initial_placing = "bottom" [
       setxy (random-float 13 + 5) (random-float 6)
@@ -301,7 +301,7 @@ to pick-up
   ]
 end
 
-; if the ant is tired or there is enough room around the current location 
+; if the ant is tired or there is enough room around the current location
 ; for the larva to be cared for, drop the larva
 to drop
   set tired steps_carrying * sqrt([weight] of target_larva)
@@ -318,8 +318,45 @@ to drop
   ]
 end
 
+to-report av-dist-cent-small
+  let sum_dist 0
+  ask larvae with [brood_type = 1] [
+    set sum_dist sum_dist + distancexy 11.5 17.5
+  ]
+  report sum_dist / nr_small
+end
 
+to-report av-dist-cent-medium
+  let sum_dist 0
+  ask larvae with [brood_type = 2] [
+    set sum_dist sum_dist + distancexy 11.5 17.5
+  ]
+  report sum_dist / nr_medium
+end
 
+to-report av-dist-cent-large
+  let sum_dist 0
+  ask larvae with [brood_type = 3] [
+    set sum_dist sum_dist + distancexy 11.5 17.5
+  ]
+  report sum_dist / nr_large
+end
+
+to-report av-dist-cent-prepupae
+  let sum_dist 0
+  ask larvae with [brood_type = 4] [
+    set sum_dist sum_dist + distancexy 11.5 17.5
+  ]
+  report sum_dist / nr_prepupae
+end
+
+to-report av-dist-cent-pupae
+  let sum_dist 0
+  ask larvae with [brood_type = 5] [
+    set sum_dist sum_dist + distancexy 11.5 17.5
+  ]
+  report sum_dist / nr_pupae
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 470
@@ -505,7 +542,7 @@ nr_ants
 nr_ants
 0
 100
-80.0
+100.0
 1
 1
 workers
@@ -694,7 +731,7 @@ CHOOSER
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
-1
+2
 
 SLIDER
 16
@@ -1008,7 +1045,7 @@ Polygon -6459832 true true 38 138 66 149
 Polygon -6459832 true true 46 128 33 120 21 118 11 123 3 138 5 160 13 178 9 192 0 199 20 196 25 179 24 161 25 148 45 140
 Polygon -6459832 true true 67 122 96 126 63 144
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1190,6 +1227,77 @@ NetLogo 6.1.1
     </enumeratedValueSet>
     <enumeratedValueSet variable="FOV">
       <value value="130"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="nr ants vary, 20 of each larva" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="20"/>
+      <value value="40"/>
+      <value value="60"/>
+      <value value="80"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="1.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
