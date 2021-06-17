@@ -662,7 +662,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-1.4
+2.0
 0.1
 1
 patches
@@ -677,7 +677,7 @@ cd_pupae
 cd_pupae
 0
 5
-2.0
+2.5
 0.1
 1
 patches
@@ -1285,10 +1285,345 @@ NetLogo 6.2.0
       <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cd_prepupae">
-      <value value="1.4"/>
+      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="colony 1" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="54"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="29"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="33"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
       <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="colony 2" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="37"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="22"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="colony 3" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="59"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="18"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="18"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="colony 4" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="82"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="17"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="16"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="27"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="29"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="colony 5" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="66"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="56"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="speed">
       <value value="0.5"/>
