@@ -124,7 +124,7 @@ TO SETUP ;----------------------------------------------------------------------
       setxy ((random-float 5 - 2.5) + 11.5) ((random-float 5 - 2.5) + 17.5)
     ]
     if initial_placing = "bottom" [
-      setxy (random-float 13 + 5) (random-float 6)
+      setxy (random-float 23) (random-float 6)
     ]
 
     ; setup larvae per type
@@ -542,7 +542,7 @@ nr_ants
 nr_ants
 0
 100
-20.0
+80.0
 1
 1
 workers
@@ -587,7 +587,7 @@ speed
 speed
 0
 1
-0.03
+0.5
 0.01
 1
 patches/tick
@@ -617,7 +617,7 @@ cd_small
 cd_small
 0
 5
-1.0
+3.0
 0.1
 1
 patches
@@ -632,7 +632,7 @@ cd_medium
 cd_medium
 0
 5
-1.0
+3.0
 0.1
 1
 patches
@@ -647,7 +647,7 @@ cd_large
 cd_large
 0
 5
-1.0
+3.0
 0.1
 1
 patches
@@ -662,7 +662,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-1.0
+3.0
 0.1
 1
 patches
@@ -677,7 +677,7 @@ cd_pupae
 cd_pupae
 0
 5
-1.0
+3.0
 0.1
 1
 patches
