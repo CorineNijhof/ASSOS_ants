@@ -15,6 +15,16 @@ globals [
   size_large
   size_prepupae
   size_pupae
+  movement_time_small
+  movement_time_medium
+  movement_time_large
+  movement_time_prepupae
+  movement_time_pupae
+  drop_counter_small
+  drop_counter_medium
+  drop_counter_large
+  drop_counter_prepupae
+  drop_counter_pupae
 ]
 
 patches-own [
@@ -41,6 +51,8 @@ larvae-own [
   carrier
   care_domain   ; space the larva needs to be taken care of, circular range
   enough_room   ; whether the larva has an empty care_domain 1=yes/0=no
+  initx
+  inity
   ; ...............
 ]
 
@@ -70,6 +82,18 @@ TO SETUP ;----------------------------------------------------------------------
   set size_large 1.5
   set size_prepupae 1
   set size_pupae 0.75
+
+  ; initialize movement duration variables
+  set movement_time_small 0
+  set movement_time_medium 0
+  set movement_time_large 0
+  set movement_time_prepupae 0
+  set movement_time_pupae 0
+  set drop_counter_small 0
+  set drop_counter_medium 0
+  set drop_counter_large 0
+  set drop_counter_prepupae 0
+  set drop_counter_pupae 0
 
   ; ant population
   create-ants nr_ants
@@ -136,8 +160,10 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_small
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 2
+        setxy random-xcor (2 + (random-float 4 - 2))
       ]
+      set initx xcor
+      set inity ycor
     ]
     ask larvae with [brood_type = 2] [       ;; medium larvae
       set care_domain cd_medium
@@ -146,8 +172,10 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_medium
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 8
+        setxy random-xcor (8 + (random-float 4 - 2))
       ]
+      set initx xcor
+      set inity ycor
     ]
     ask larvae with [brood_type = 3] [       ;; large larvae
       set care_domain cd_large
@@ -156,8 +184,10 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_large
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 10
+        setxy random-xcor (10 + (random-float 4 - 2))
       ]
+      set initx xcor
+      set inity ycor
     ]
     ask larvae with [brood_type = 4] [       ;; prepupae
       set care_domain cd_prepupae
@@ -166,8 +196,10 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_prepupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 4
+        setxy random-xcor (4 + (random-float 4 - 2))
       ]
+      set initx xcor
+      set inity ycor
     ]
     ask larvae with [brood_type = 5] [       ;; pupae
       set care_domain cd_pupae
@@ -176,8 +208,10 @@ TO SETUP ;----------------------------------------------------------------------
       set color def_color
       set size size_pupae
       if initial_placing = "sorted bottom" [
-        setxy random-xcor 6
+        setxy random-xcor (6 + (random-float 4 - 2))
       ]
+      set initx xcor
+      set inity ycor
     ]
 
 
@@ -307,9 +341,37 @@ to drop
   set tired steps_carrying * sqrt([weight] of target_larva)
 
   if (([enough_room] of target_larva) = 1) or (tired > max_tiredness) [
+    let movement_time steps_carrying
     set steps_carrying 0
     set tired 0
     ask target_larva [
+      ifelse brood_type = 1 [ ;; small larvae
+        set movement_time_small movement_time_small + movement_time
+        set drop_counter_small drop_counter_small + 1
+      ]
+      [
+        ifelse brood_type = 2 [ ;; medium larvae
+          set movement_time_medium movement_time_medium + movement_time
+          set drop_counter_medium drop_counter_medium + 1
+        ]
+        [
+          ifelse brood_type = 3 [ ;; large larvae
+            set movement_time_large movement_time_large + movement_time
+            set drop_counter_large drop_counter_large + 1
+          ]
+          [
+            ifelse brood_type = 4 [ ;; prepupae
+              set movement_time_prepupae movement_time_prepupae + movement_time
+              set drop_counter_prepupae drop_counter_prepupae + 1
+            ]
+            [                      ;; pupae
+              set movement_time_pupae movement_time_pupae + movement_time
+              set drop_counter_pupae drop_counter_pupae + 1
+            ]
+          ]
+        ]
+      ]
+
       set carrier nobody
       set carried 0
       ;if enough_room = 1 [ set color green ]
@@ -356,6 +418,106 @@ to-report av-dist-cent-pupae
     set sum_dist sum_dist + distancexy 11.5 17.5
   ]
   report sum_dist / nr_pupae
+end
+
+to-report av-ycor-small
+  let sum_ycor 0
+  ask larvae with [brood_type = 1] [
+    set sum_ycor sum_ycor + ycor
+  ]
+  report sum_ycor / nr_small
+end
+
+to-report av-ycor-medium
+  let sum_ycor 0
+  ask larvae with [brood_type = 2] [
+    set sum_ycor sum_ycor + ycor
+  ]
+  report sum_ycor / nr_medium
+end
+
+to-report av-ycor-large
+  let sum_ycor 0
+  ask larvae with [brood_type = 3] [
+    set sum_ycor sum_ycor + ycor
+  ]
+  report sum_ycor / nr_large
+end
+
+to-report av-ycor-pupae
+  let sum_ycor 0
+  ask larvae with [brood_type = 4] [
+    set sum_ycor sum_ycor + ycor
+  ]
+  report sum_ycor / nr_pupae
+end
+
+to-report av-ycor-prepupae
+  let sum_ycor 0
+  ask larvae with [brood_type = 5] [
+    set sum_ycor sum_ycor + ycor
+  ]
+  report sum_ycor / nr_prepupae
+end
+
+to-report log-prop-carried
+  let counter 0
+  ask larvae with [carried = 1] [
+   set counter counter + 1
+  ]
+  report ln (counter / nr_larvae)
+end
+
+to-report av-dur-mov-small
+  report movement_time_small / drop_counter_small
+end
+to-report av-dur-mov-medium
+  report movement_time_medium / drop_counter_medium
+end
+to-report av-dur-mov-large
+  report movement_time_large / drop_counter_large
+end
+to-report av-dur-mov-prepupae
+  report movement_time_prepupae / drop_counter_prepupae
+end
+to-report av-dur-mov-pupae
+  report movement_time_pupae / drop_counter_pupae
+end
+
+to-report rms-displ-small
+  let sum-sq 0
+  ask larvae with [brood_type = 1] [
+    set sum-sq sum-sq + ( sqrt( (ycor - inity) ^ 2 + (xcor - initx) ^ 2 )) ^ 2
+  ]
+  report sqrt(sum-sq / nr_small)
+end
+to-report rms-displ-medium
+  let sum-sq 0
+  ask larvae with [brood_type = 2] [
+    set sum-sq sum-sq + ( sqrt( (ycor - inity) ^ 2 + (xcor - initx) ^ 2 )) ^ 2
+  ]
+  report sqrt(sum-sq / nr_medium)
+end
+to-report rms-displ-large
+  let sum-sq 0
+  ask larvae with [brood_type = 3] [
+    set sum-sq sum-sq + ( sqrt( (ycor - inity) ^ 2 + (xcor - initx) ^ 2 )) ^ 2
+  ]
+  report sqrt(sum-sq / nr_large)
+end
+to-report rms-displ-prepupae
+  let sum-sq 0
+  ask larvae with [brood_type = 4] [
+    set sum-sq sum-sq + ( sqrt( (ycor - inity) ^ 2 + (xcor - initx) ^ 2 )) ^ 2
+  ]
+  report sqrt(sum-sq / nr_prepupae)
+end
+to-report rms-displ-pupae
+  let sum-sq 0
+  ask larvae with [brood_type = 5] [
+    set sum-sq sum-sq + ( sqrt( (ycor - inity) ^ 2 + (xcor - initx) ^ 2 )) ^ 2
+  ]
+  report sqrt(sum-sq / nr_pupae)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -617,7 +779,7 @@ cd_small
 cd_small
 0
 5
-3.0
+1.0
 0.1
 1
 patches
@@ -632,7 +794,7 @@ cd_medium
 cd_medium
 0
 5
-3.0
+3.5
 0.1
 1
 patches
@@ -647,7 +809,7 @@ cd_large
 cd_large
 0
 5
-3.0
+5.0
 0.1
 1
 patches
@@ -662,7 +824,7 @@ cd_prepupae
 cd_prepupae
 0
 5
-3.0
+2.0
 0.1
 1
 patches
@@ -677,7 +839,7 @@ cd_pupae
 cd_pupae
 0
 5
-3.0
+2.5
 0.1
 1
 patches
@@ -692,7 +854,7 @@ max_tiredness
 max_tiredness
 0
 300
-200.0
+100.0
 10
 1
 steps*weight
@@ -731,7 +893,7 @@ CHOOSER
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
-3
+2
 
 SLIDER
 16
@@ -1692,6 +1854,420 @@ NetLogo 6.2.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="cd_prepupae">
       <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="av_pos_center" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dist-cent-small</metric>
+    <metric>av-dist-cent-medium</metric>
+    <metric>av-dist-cent-large</metric>
+    <metric>av-dist-cent-prepupae</metric>
+    <metric>av-dist-cent-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="av_pos_bottom" repetitions="5" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-ycor-small</metric>
+    <metric>av-ycor-medium</metric>
+    <metric>av-ycor-large</metric>
+    <metric>av-ycor-prepupae</metric>
+    <metric>av-ycor-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;bottom&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="av_dur_mov_bottom" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dur-mov-small</metric>
+    <metric>av-dur-mov-medium</metric>
+    <metric>av-dur-mov-large</metric>
+    <metric>av-dur-mov-prepupae</metric>
+    <metric>av-dur-mov-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;bottom&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="25"/>
+      <value value="50"/>
+      <value value="75"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="av_dur_mov_center" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>av-dur-mov-small</metric>
+    <metric>av-dur-mov-medium</metric>
+    <metric>av-dur-mov-large</metric>
+    <metric>av-dur-mov-prepupae</metric>
+    <metric>av-dur-mov-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="25"/>
+      <value value="50"/>
+      <value value="75"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="rms_displ_bottom" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>rms-displ-small</metric>
+    <metric>rms-displ-medium</metric>
+    <metric>rms-displ-large</metric>
+    <metric>rms-displ-prepupae</metric>
+    <metric>rms-displ-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;bottom&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="25"/>
+      <value value="50"/>
+      <value value="75"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_pupae">
+      <value value="2.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="speed">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pickup_range">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="FOV">
+      <value value="120"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="rms_displ_center" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>hours = 48</exitCondition>
+    <metric>rms-displ-small</metric>
+    <metric>rms-displ-medium</metric>
+    <metric>rms-displ-large</metric>
+    <metric>rms-displ-prepupae</metric>
+    <metric>rms-displ-pupae</metric>
+    <enumeratedValueSet variable="nr_ants">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_small">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_medium">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_large">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_prepupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="nr_pupae">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="vision">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial_placing">
+      <value value="&quot;center&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_tiredness">
+      <value value="25"/>
+      <value value="50"/>
+      <value value="75"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="scent_range">
+      <value value="12"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="pheromone_diffusion">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_small">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_medium">
+      <value value="3.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_large">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cd_prepupae">
+      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cd_pupae">
       <value value="2.5"/>
