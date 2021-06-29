@@ -232,6 +232,11 @@ TO SETUP ;----------------------------------------------------------------------
   reset-ticks
 end
 
+to remove-ants
+  ask ants [
+    hide-turtle
+  ]
+end
 
 TO GO ;--------------------------------------------------------------------------------------------
 
@@ -704,7 +709,7 @@ nr_ants
 nr_ants
 0
 100
-100.0
+80.0
 1
 1
 workers
@@ -779,7 +784,7 @@ cd_small
 cd_small
 0
 5
-2.5
+1.0
 0.1
 1
 patches
@@ -794,7 +799,7 @@ cd_medium
 cd_medium
 0
 5
-2.5
+3.5
 0.1
 1
 patches
@@ -809,7 +814,7 @@ cd_large
 cd_large
 0
 5
-2.5
+5.0
 0.1
 1
 patches
@@ -839,7 +844,7 @@ cd_pupae
 cd_pupae
 0
 5
-2.5
+2.0
 0.1
 1
 patches
@@ -909,6 +914,23 @@ scent_range
 1
 patches
 HORIZONTAL
+
+BUTTON
+327
+287
+431
+345
+Hide ants
+remove-ants
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
