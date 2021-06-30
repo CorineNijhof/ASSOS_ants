@@ -343,7 +343,12 @@ end
 ; if the ant is tired or there is enough room around the current location
 ; for the larva to be cared for, drop the larva
 to drop
-  set tired steps_carrying * sqrt([weight] of target_larva)
+  ifelse tiredness_dep_weight [
+    set tired steps_carrying * sqrt([weight] of target_larva)
+  ]
+  [
+    set tired steps_carrying * 4
+  ]
 
   if (([enough_room] of target_larva) = 1) or (tired > max_tiredness) [
     let movement_time steps_carrying
@@ -876,10 +881,10 @@ Grid size: 23x35\n\nLarvae color code\ndark blue    - small larvae\nmiddle blue 
 1
 
 SLIDER
-252
-181
-460
-214
+244
+220
+452
+253
 pheromone_diffusion
 pheromone_diffusion
 0
@@ -891,10 +896,10 @@ NIL
 HORIZONTAL
 
 CHOOSER
-252
-218
-460
-263
+244
+257
+452
+302
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
@@ -916,10 +921,10 @@ patches
 HORIZONTAL
 
 BUTTON
-327
-287
-431
-345
+314
+143
+418
+201
 Hide ants
 remove-ants
 NIL
@@ -931,6 +936,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+243
+321
+421
+354
+tiredness_dep_weight
+tiredness_dep_weight
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
