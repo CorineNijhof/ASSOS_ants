@@ -100,8 +100,8 @@ TO SETUP ;----------------------------------------------------------------------
   set-default-shape ants "bug"
   ask ants [
     set steps_carrying 0
-    set type_carrying 0
-    set turn_stdev 2
+    set type_carrying 0      ; 0 if not carrying any larva
+    set turn_stdev 2         ; standard deviation for turning
     set color black
     set size 1
     setxy random-xcor random-ycor
@@ -111,7 +111,7 @@ TO SETUP ;----------------------------------------------------------------------
   set nr_larvae (nr_small + nr_medium + nr_large + nr_prepupae + nr_pupae)
   create-larvae nr_larvae
   set-default-shape larvae "egg"
-  let counter 0
+  let counter 0                   ; counter for distinguishing between types
   ask larvae [
     ; set carrier parameters
     set carried 0
@@ -232,6 +232,7 @@ TO SETUP ;----------------------------------------------------------------------
   reset-ticks
 end
 
+; button for hiding ants from the view
 to remove-ants
   ask ants [
     hide-turtle
@@ -247,7 +248,7 @@ TO GO ;-------------------------------------------------------------------------
   ]
 
   ask larvae [
-
+    ; compute whether larva has enough room for care
     ifelse (count((larvae with [carried = 0]) in-radius care_domain) > 1) [
       set enough_room 0
       set color def_color
@@ -257,6 +258,7 @@ TO GO ;-------------------------------------------------------------------------
       ;if carried = 0 [ set color green ]
     ]
 
+    ; if larva is carried, set the coordinates equal to the carrying ant
     if carried = 1 [
       let car_corx 0
       let car_cory 0
@@ -268,6 +270,7 @@ TO GO ;-------------------------------------------------------------------------
     ]
   ]
 
+  ; pheromones diffusion
   ask patches [
     set pheromones (count larvae-here) / 8
   ]
@@ -279,6 +282,7 @@ TO GO ;-------------------------------------------------------------------------
   ask ants [
     check_boundaries
 
+    ; if not carrying something, select a target and turn towards it, or pick up a target
     ifelse steps_carrying = 0 [
       select-target
       ifelse target_larva = nobody [
@@ -291,8 +295,8 @@ TO GO ;-------------------------------------------------------------------------
     [
       set steps_carrying steps_carrying + 1
     ]
-    ;right random-normal 0 turn_stdev
-    forward 0.05
+
+    forward speed
 
     if target_larva != nobody [
       drop
@@ -759,7 +763,7 @@ speed
 speed
 0
 1
-0.5
+0.1
 0.01
 1
 patches/tick
@@ -903,7 +907,7 @@ CHOOSER
 initial_placing
 initial_placing
 "sorted bottom" "random" "center" "bottom"
-3
+2
 
 SLIDER
 16
